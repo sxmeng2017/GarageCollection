@@ -6,17 +6,13 @@ import matplotlib.pyplot as plt
 import matplotlib
 import time
 
-class heap:
 
-    ROOT = object(address=-1, child=None, size=0)
-    FREE = object(address=0, child=None, size=0)
+class heap:
 
     def __init__(self, size):
         self.size = size
         self.space_mark = np.zeros((size, ))
         self.space_ = {}
-        self.space_[0] = self.FREE
-        self.FREE.size = size
 
     def heatmap(self):
         length = np.sqrt(self.size)

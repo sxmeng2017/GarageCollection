@@ -4,10 +4,15 @@ from heap import heap
 
 class MarkSweep:
 
+    ROOT = object(address=-1, child=None, size=0)
+    FREE = object(address=0, child=None, size=0)
+
     def __init__(self, heap):
         self.heap = heap
         self.size = heap.size
         self.res = 0
+        self.FREE.size = heap.size
+        self.heap.space_[0] = self.FREE
 
     def receive(self, size):
         self.res = self.new_obj(size)
@@ -27,7 +32,7 @@ class MarkSweep:
             raise ValueError("No space")
 
     def pickup_chunk(self, size, heap):
-        Free = heap.FREE
+        Free = self.FREE
         while Free:
             if Free.size >= size:
                 start = Free.address
@@ -42,39 +47,42 @@ class MarkSweep:
             Free = Free.child
         return None
 
-
     def mark_phase(self):
-        r = self.heap.ROOT.child
+        r = self.ROOT.child
         self.mark(r)
-
 
     def sweep_phase(self):
         sweeping = 0
-        self.heap.FREE = object(address=0, child=None, size=0)
+        self.FREE = object(address=0, child=None, size=0)
         while sweeping < self.size:
             sweep_obj = self.heap.space_[sweeping]
             if sweep_obj.mark == True:
                 sweep_obj.mark = False
             else:
-                #print(self.heap.FREE)
+                #print(self.FREE)
                 for i in range(sweep_obj.size):
                     self.heap.space_mark[sweeping + i] = 0
-                if sweeping == self.heap.FREE.address + self.heap.FREE.size:
-                    self.heap.FREE.size = self.heap.FREE.size + sweep_obj.size
+                if sweeping == self.FREE.address + self.FREE.size:
+                    self.FREE.size = self.FREE.size + sweep_obj.size
                 else:
-                    sweep_obj.child = self.heap.FREE
-                    self.heap.FREE = sweep_obj
-                #print(self.heap.FREE)
+                    sweep_obj.child = self.FREE
+                    self.FREE = sweep_obj
+                #print(self.FREE)
 
             sweeping += sweep_obj.size
 
     def mark(self, obj):
+        print(obj)
         if not obj:
             return
         if obj.mark != True:
             obj.mark = True
             c = obj.child
             self.mark(c)
+
+
+
+
 
 
 

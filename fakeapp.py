@@ -14,7 +14,7 @@ class fakeapp:
     def get(self, size):
         self.GC.receive(size)
         obj = self.GC.send()
-        parent = self.GC.heap.ROOT
+        parent = self.GC.ROOT
         if self.space:
             parent = self.space[-1]
         parent.child = obj
@@ -26,13 +26,13 @@ class fakeapp:
             try:
                 self.del_obj(obj)
             except:
-                self.GC.heap.ROOT.child = None
+                self.GC.ROOT.child = None
         else:
             raise ValueError("None space used!")
 
 
     def del_obj(self, obj):
-        r = self.GC.heap.ROOT
+        r = self.GC.ROOT
         while r:
             c = r.child
             if c is obj:
