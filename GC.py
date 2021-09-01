@@ -1,6 +1,7 @@
 from object import object
 from heap import heap
 
+
 class MarkSweep:
 
     def __init__(self, heap):
@@ -49,7 +50,7 @@ class MarkSweep:
 
     def sweep_phase(self):
         sweeping = 0
-        self.heap.FREE = None
+        self.heap.FREE = object(address=0, child=None, size=0)
         while sweeping < self.size:
             sweep_obj = self.heap.space_[sweeping]
             if sweep_obj.mark == True:
@@ -58,8 +59,11 @@ class MarkSweep:
                 #print(self.heap.FREE)
                 for i in range(sweep_obj.size):
                     self.heap.space_mark[sweeping + i] = 0
-                sweep_obj.child = self.heap.FREE
-                self.heap.FREE = sweep_obj
+                if sweeping == self.heap.FREE.address + self.heap.FREE.size:
+                    self.heap.FREE.size = self.heap.FREE.size + sweep_obj.size
+                else:
+                    sweep_obj.child = self.heap.FREE
+                    self.heap.FREE = sweep_obj
                 #print(self.heap.FREE)
 
             sweeping += sweep_obj.size
@@ -71,6 +75,8 @@ class MarkSweep:
             obj.mark = True
             c = obj.child
             self.mark(c)
+
+
 
 if __name__ == '__main__':
     heap = heap(50)
