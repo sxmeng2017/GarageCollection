@@ -275,6 +275,75 @@ class BitMap:
             c = obj.child
             self.mark(c)
 
+"""
+lazysweep can mix up sweep and pickup.only when process need more space ,GC would 
+start sweep garbage.
+"""
+
+class LazySweep:
+    ROOT = object(address=-1, child=None, size=0)
+    FREE = object(address=0, child=None, size=0)
+
+    def __init__(self, heap):
+        self.heap = heap
+        self.size = heap.size
+        self.res = 0
+        self.FREE.size = heap.size
+        self.heap.space_[0] = self.FREE
+
+    def receive(self, size):
+        self.res = self.new_obj(size)
+
+    def send(self):
+        return self.res
+
+    def mark_sweep(self):
+        self.mark_phase()
+        self.lazy_sweep(self.heap.size, self.heap)
+
+    def new_obj(self, size):
+        chunk = self.lazy_sweep(size, self.heap)
+        if chunk:
+            return chunk
+        self.mark_phase()
+        chunk = self.lazy_sweep(size, self.heap)
+        if chunk:
+            return chunk
+        else:
+            raise ValueError("No space")
+
+
+    def mark_phase(self):
+        r = self.ROOT.child
+        self.mark(r)
+
+
+
+    def mark(self, obj):
+        print(obj)
+        if not obj:
+            return
+        if obj.mark != True:
+            obj.mark = True
+            c = obj.child
+            self.mark(c)
+
+    def lazy_sweep(self, size, heap):
+        sweeping = 0
+        while sweeping < heap.size:
+            sweep_obj = heap.space_.get(sweeping)
+            if sweep_obj.mark == True:
+                sweep_obj.mark = False
+            else:
+                if sweep_obj.size >= size:
+                    chunk = sweep_obj
+                    sweeping += sweep_obj.size
+                    return chunk
+            sweeping += sweep_obj.size
+        return
+
+
+
 
 if __name__ == '__main__':
     heap = heap(500)
